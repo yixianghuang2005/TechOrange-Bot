@@ -1,0 +1,19 @@
+# 環境變數（絕對不能 commit）
+.env
+*.json
+!package.json
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+.venv/
+venv/
+env/
+
+# Vercel
+.vercel/
+
+# 系統
+.DS_Store
+Thumbs.db
