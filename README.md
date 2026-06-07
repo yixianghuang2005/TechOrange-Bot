@@ -1,4 +1,5 @@
 # TechOrange 科技智囊 LINE Bot
+資訊管理導論期末專案 — TechOrange 科技智囊聊天機器人
 
 幫你快速掌握最新科技趨勢、AI 動態、資安預警。
 
