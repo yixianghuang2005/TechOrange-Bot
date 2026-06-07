@@ -1,7 +1,7 @@
 # 環境變數（絕對不能 commit）
 .env
-*.json
-!package.json
+*service-account.json
+*credentials.json
 
 # Python
 __pycache__/
