@@ -13,7 +13,7 @@
 | 🚀 | **今日科技早報** | 抓取 TechOrange 最新 5 篇文章 |
 | 🧠 | **AI 相關** | 過濾 AI 類別文章即時呈現 |
 | 🛡️ | **資安相關** | 最新資安威脅新聞 |
-| 🔍 | **關鍵字科普** | 輸入詞彙，Gemini AI 白話解釋 |
+| 🔍 | **關鍵字科普** | 輸入詞彙，Gemini AI 白話解釋 + TechOrange 相關報導 |
 | 🏭 | **產業轉型** | 數位轉型、智慧製造相關報導 |
 | ⚙️ | **使用說明** | Bot 功能介紹 |
 
@@ -27,7 +27,7 @@
 | Web 框架 | FastAPI |
 | 資料抓取 | requests + BeautifulSoup（RSS XML 解析）|
 | 意圖辨識 | Dialogflow ES |
-| AI 回覆 | Gemini API（gemini-2.0-flash-lite）|
+| AI 回覆 | Gemini API（gemini-2.5-flash-lite）|
 | 資料庫 | Firebase Firestore |
 | 部署 | Vercel |
 | LINE 整合 | LINE Messaging API + Dialogflow LINE Integration |
