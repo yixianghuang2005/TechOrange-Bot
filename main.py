@@ -187,7 +187,7 @@ def _ask_gemini(prompt: str) -> str:
             system_instruction="你是 TechOrange 科技智囊助理，請用繁體中文簡潔回答。"
         )
         response = client.models.generate_content(
-            model="gemini-1.5-flash",   # 免費配額較充足
+            model="gemini-2.0-flash-lite",   # 輕量版，免費配額較充足
             contents=prompt,
             config=config,
         )
