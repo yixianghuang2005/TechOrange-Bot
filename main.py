@@ -1,4 +1,4 @@
-from fastapi import FastAPI, Request, HTTPException
+from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
 import os
 from dotenv import load_dotenv
@@ -13,59 +13,154 @@ def root():
     return {"status": "TechOrange Bot is running 🚀"}
 
 
-# ── Dialogflow Fulfillment Webhook ──────────────────────────
-# Dialogflow 偵測到 intent 後，呼叫此端點
-# 我們根據 intent 名稱呼叫對應功能，回傳 fulfillmentText 給 LINE
 @app.post("/webhook")
 async def dialogflow_webhook(request: Request):
-    req = await request.json()
-
-    intent_name = req.get("queryResult", {}).get("intent", {}).get("displayName", "")
-    user_text   = req.get("queryResult", {}).get("queryText", "")
-
-    info = dispatch_intent(intent_name, user_text)
-
-    return JSONResponse(content={"fulfillmentText": info})
+    try:
+        req = await request.json()
+        intent_name = req.get("queryResult", {}).get("intent", {}).get("displayName", "")
+        user_text   = req.get("queryResult", {}).get("queryText", "")
+        info = dispatch_intent(intent_name, user_text)
+        return JSONResponse(content={"fulfillmentText": info})
+    except Exception as e:
+        return JSONResponse(content={"fulfillmentText": f"系統錯誤：{str(e)}"})
 
 
 def dispatch_intent(intent_name: str, user_text: str) -> str:
-    """根據 intent 名稱呼叫對應功能"""
+    try:
+        if intent_name == "daily_brief":
+            return _get_daily_brief()          # ← 直接 RSS，不用 AI
 
-    if intent_name == "daily_brief":
-        from features.news.daily_brief import get_daily_brief
-        return get_daily_brief()
+        elif intent_name == "ai_consultant":
+            return (
+                "🧠 AI 落地顧問\n\n"
+                "請輸入您的行業別，我會幫您生成 AI 轉型建議！\n\n"
+                "例如：「我是零售業」、「製造業」、「餐飲業」"
+            )
 
-    elif intent_name == "ai_consultant":
-        # 請使用者輸入行業別
-        return "🧠 AI 落地顧問\n\n請輸入您的行業別，我會幫您生成 AI 轉型建議！\n\n例如：「我是零售業」、「製造業」、「餐飲業」"
+        elif intent_name == "security":
+            return _get_security()             # ← 直接 RSS，不用 AI
 
-    elif intent_name == "security":
-        from features.security.alert import get_security_alert
-        return get_security_alert()
+        elif intent_name == "keyword":
+            keyword = user_text.replace("什麼是", "").replace("解釋", "").replace("？", "").strip()
+            return _explain_keyword(keyword)   # ← 用 Gemini
 
-    elif intent_name == "keyword":
-        return (
-            "🔍 關鍵字科普\n\n"
-            "請輸入想了解的科技詞彙，例如：\n"
-            "• 什麼是 RAG？\n"
-            "• 解釋 Agentic AI\n"
-            "• MCP 是什麼\n"
-            "• 邊緣運算"
+        elif intent_name == "industry":
+            return _get_industry()             # ← 直接 RSS，不用 AI
+
+        elif intent_name == "settings":
+            return (
+                "⚙️ TechOrange 科技智囊　使用說明\n"
+                "━━━━━━━━━━━━━━━━━━\n"
+                "🚀 今日科技早報 → 每日最新科技新聞\n"
+                "🧠 AI 落地顧問 → 輸入行業取得 AI 建議\n"
+                "🛡️ 資安預警 → 最新資安威脅\n"
+                "🔍 關鍵字科普 → 白話解釋科技詞彙\n"
+                "🏭 產業轉型 → 台灣企業轉型案例\n"
+                "━━━━━━━━━━━━━━━━━━\n"
+                "📌 資料來源：techorange.com"
+            )
+
+        else:
+            # 使用者問了無關的問題 → Gemini 回答
+            return _ask_gemini(user_text)
+
+    except Exception as e:
+        return f"⚠️ 發生錯誤：{str(e)}"
+
+
+# ── 新聞類：直接顯示 RSS 標題 + 連結，不呼叫 AI ─────────────
+
+def _get_daily_brief() -> str:
+    import requests
+    from bs4 import BeautifulSoup
+
+    res = requests.get("https://techorange.com/feed/", timeout=10)
+    soup = BeautifulSoup(res.content, "xml")
+    items = soup.find_all("item")[:5]
+
+    lines = []
+    for item in items:
+        title = item.find("title").text.strip()
+        link  = item.find("link").text.strip()
+        lines.append(f"📌 {title}\n🔗 {link}")
+
+    return "🚀 今日科技早報\n\n" + "\n\n".join(lines)
+
+
+def _get_security() -> str:
+    import requests
+    from bs4 import BeautifulSoup
+
+    res = requests.get(
+        "https://techorange.com/category/cybersecurity/feed/", timeout=10
+    )
+    soup = BeautifulSoup(res.content, "xml")
+    items = soup.find_all("item")[:5]
+
+    lines = []
+    for item in items:
+        title = item.find("title").text.strip()
+        link  = item.find("link").text.strip()
+        lines.append(f"🛡️ {title}\n🔗 {link}")
+
+    return "🛡️ 最新資安預警\n\n" + "\n\n".join(lines)
+
+
+def _get_industry() -> str:
+    import requests
+    from bs4 import BeautifulSoup
+
+    res = requests.get("https://techorange.com/feed/", timeout=10)
+    soup = BeautifulSoup(res.content, "xml")
+    items = soup.find_all("item")[:15]
+
+    keywords = ["數位轉型", "智慧製造", "ESG", "供應鏈", "中小企業", "自動化", "工廠"]
+    lines = []
+    for item in items:
+        title = item.find("title").text.strip()
+        link  = item.find("link").text.strip()
+        if any(kw in title for kw in keywords):
+            lines.append(f"🏭 {title}\n🔗 {link}")
+
+    if not lines:
+        for item in items[:3]:
+            title = item.find("title").text.strip()
+            link  = item.find("link").text.strip()
+            lines.append(f"🏭 {title}\n🔗 {link}")
+
+    return "🏭 產業轉型案例\n\n" + "\n\n".join(lines)
+
+
+# ── AI 類：只有關鍵字科普和 Fallback 呼叫 Gemini ────────────
+
+def _explain_keyword(keyword: str) -> str:
+    if not keyword:
+        return "🔍 請輸入想了解的科技詞彙，例如：「什麼是 RAG？」"
+    prompt = (
+        f"請用「高中生都能懂的方式」解釋「{keyword}」。\n"
+        "格式：①一句話定義 ②生活化比喻 ③台灣應用案例 ④為什麼重要\n"
+        "繁體中文，不超過 200 字。"
+    )
+    return f"🔍 {keyword} 是什麼？\n\n" + _ask_gemini(prompt)
+
+
+def _ask_gemini(prompt: str) -> str:
+    try:
+        from google import genai
+        from google.genai import types
+
+        api_key = os.getenv("GEMINI_API_KEY")
+        client = genai.Client(api_key=api_key)
+
+        config = types.GenerateContentConfig(
+            max_output_tokens=400,
+            system_instruction="你是 TechOrange 科技智囊助理，請用繁體中文簡潔回答。"
         )
-
-    elif intent_name == "industry":
-        from features.industry.transform import get_transform_cases
-        return get_transform_cases()
-
-    elif intent_name == "settings":
-        from features.subscription.settings import show_settings
-        return show_settings("")
-
-    else:
-        # Default Fallback Intent → Gemini 回答
-        from utils.gemini_client import ask_gemini
-        instruction = (
-            "你是 TechOrange 科技智囊助理，專門回答科技、AI、資安相關問題。"
-            "請用繁體中文回覆重點，不超過 200 字，不要重述問題。"
+        response = client.models.generate_content(
+            model="gemini-1.5-flash",   # 免費配額較充足
+            contents=prompt,
+            config=config,
         )
-        return ask_gemini(user_text, system_instruction=instruction)
+        return response.text if response.text else "抱歉，AI 暫時無法回應。"
+    except Exception as e:
+        return f"⚠️ AI 暫時無法回應，請稍後再試。"
