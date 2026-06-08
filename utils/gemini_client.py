@@ -6,7 +6,7 @@ Gemini API 封裝
 from google import genai
 from google.genai import types
 
-MODEL = "gemini-2.5-flash"
+MODEL = "gemini-2.0-flash-lite"
 
 
 def _get_client():
