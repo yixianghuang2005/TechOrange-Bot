@@ -60,17 +60,8 @@ def dispatch_intent(intent_name: str, user_text: str) -> str:
             return _get_industry()             # ← 直接 RSS，不用 AI
 
         elif intent_name == "settings":
-            return (
-                "⚙️ TechOrange 科技智囊　使用說明\n"
-                "━━━━━━━━━━━━━━━━━━\n"
-                "🚀 今日科技早報 → 每日最新科技新聞\n"
-                "🧠 AI 落地顧問 → 輸入行業取得 AI 建議\n"
-                "🛡️ 資安預警 → 最新資安威脅\n"
-                "🔍 關鍵字科普 → 白話解釋科技詞彙\n"
-                "🏭 產業轉型 → 台灣企業轉型案例\n"
-                "━━━━━━━━━━━━━━━━━━\n"
-                "📌 資料來源：techorange.com"
-            )
+            from features.subscription.settings import show_settings
+            return show_settings("")
 
         else:
             # 使用者問了無關的問題 → Gemini 回答
@@ -202,4 +193,4 @@ def _ask_gemini(prompt: str) -> str:
         )
         return response.text if response.text else "抱歉，AI 暫時無法回應。"
     except Exception as e:
-        return f"⚠️ AI 暫時無法回應，請稍後再試。"
+        return f"⚠️ AI 錯誤：{str(e)[:150]}"
