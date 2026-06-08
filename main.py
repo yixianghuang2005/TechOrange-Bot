@@ -187,7 +187,7 @@ def _ask_gemini(prompt: str) -> str:
             system_instruction="你是 TechOrange 科技智囊助理，請用繁體中文簡潔回答。"
         )
         response = client.models.generate_content(
-            model="gemini-2.5-flash-preview-05-20",   # 老師建議的輕量模型
+            model="gemini-2.0-flash",
             contents=prompt,
             config=config,
         )
