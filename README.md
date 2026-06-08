@@ -60,28 +60,14 @@ RSS 爬蟲        （關鍵字科普
 
 ```
 TechOrange-Bot/
-├── main.py                   # FastAPI 主程式 + Dialogflow webhook
+├── main.py                        # FastAPI 主程式 + 六個意圖處理 + RSS 爬蟲
 ├── requirements.txt
 ├── vercel.json
 ├── api/
-│   └── index.py              # Vercel 入口
-├── features/
-│   ├── news/daily_brief.py   # 今日科技早報
-│   ├── ai/consultant.py      # AI 相關新聞
-│   ├── security/alert.py     # 資安預警
-│   ├── explainer/keyword.py  # 關鍵字科普
-│   ├── industry/transform.py # 產業轉型
-│   └── subscription/settings.py # 使用說明
-├── scraper/
-│   └── rss.py                # RSS 爬蟲工具
-├── utils/
-│   └── gemini_client.py      # Gemini API 封裝
-├── db/
-│   └── firebase.py           # Firebase 快取
-├── dialogflow/
-│   └── client.py             # Dialogflow 封裝
-└── rich_menu/
-    └── setup_menu.py         # LINE Rich Menu 設定
+│   └── index.py                   # Vercel serverless 入口
+└── features/
+    └── subscription/
+        └── settings.py            # 使用說明功能
 ```
 
 ---
