@@ -167,7 +167,6 @@ def _explain_keyword(keyword: str) -> str:
     if not keyword:
         return "🔍 請輸入想了解的科技詞彙，例如：「什麼是 RAG？」"
 
-    # 先嘗試 Gemini，失敗就改顯示相關文章
     prompt = (
         f"請用「高中生都能懂的方式」解釋「{keyword}」。\n"
         "格式：①一句話定義 ②生活化比喻 ③台灣應用案例 ④為什麼重要\n"
@@ -175,11 +174,37 @@ def _explain_keyword(keyword: str) -> str:
     )
     ai_result = _ask_gemini(prompt)
 
-    # 如果 Gemini 失敗，改顯示 TechOrange 相關文章
+    # Gemini 失敗時只顯示文章
     if "AI 錯誤" in ai_result or "無法回應" in ai_result:
         return _search_keyword_articles(keyword)
 
-    return f"🔍 {keyword} 是什麼？\n\n{ai_result}"
+    # Gemini 成功：回傳解釋 + 相關文章
+    articles = _get_related_articles(keyword)
+    result = f"🔍 {keyword} 是什麼？\n\n{ai_result}"
+    if articles:
+        result += f"\n\n📰 相關報導\n\n{articles}"
+    return result
+
+
+def _get_related_articles(keyword: str) -> str:
+    """回傳相關文章清單字串（無標題，供組合用）"""
+    import requests
+    from bs4 import BeautifulSoup
+    try:
+        res = requests.get("https://techorange.com/feed/", timeout=8)
+        soup = BeautifulSoup(res.content, "xml")
+        items = soup.find_all("item")
+        keyword_lower = keyword.lower()
+        matched = []
+        for item in items:
+            title = item.find("title").text.strip()
+            desc  = item.find("description").text.strip() if item.find("description") else ""
+            link  = item.find("link").text.strip()
+            if keyword_lower in title.lower() or keyword_lower in desc.lower():
+                matched.append(f"📌 {title}\n🔗 {link}")
+        return "\n\n".join(matched[:3])
+    except Exception:
+        return ""
 
 
 def _search_keyword_articles(keyword: str) -> str:
