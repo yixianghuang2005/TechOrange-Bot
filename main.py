@@ -31,11 +31,7 @@ def dispatch_intent(intent_name: str, user_text: str) -> str:
             return _get_daily_brief()          # ← 直接 RSS，不用 AI
 
         elif intent_name == "ai_consultant":
-            return (
-                "🧠 AI 落地顧問\n\n"
-                "請輸入您的行業別，我會幫您生成 AI 轉型建議！\n\n"
-                "例如：「我是零售業」、「製造業」、「餐飲業」"
-            )
+            return _get_ai_news()   # ← 直接顯示 AI 類新聞
 
         elif intent_name == "security":
             return _get_security()             # ← 直接 RSS，不用 AI
@@ -85,6 +81,33 @@ def _get_daily_brief() -> str:
         lines.append(f"📌 {title}\n🔗 {link}")
 
     return "🚀 今日科技早報\n\n" + "\n\n".join(lines)
+
+
+def _get_ai_news() -> str:
+    import requests
+    from bs4 import BeautifulSoup
+
+    res = requests.get("https://techorange.com/feed/", timeout=10)
+    soup = BeautifulSoup(res.content, "xml")
+    items = soup.find_all("item")
+
+    # 過濾 AI 類文章
+    ai_items = []
+    for item in items:
+        cats = [c.text for c in item.find_all("category")]
+        if any("AI" in c for c in cats):
+            ai_items.append(item)
+
+    if not ai_items:
+        ai_items = items[:5]
+
+    lines = []
+    for item in ai_items[:5]:
+        title = item.find("title").text.strip()
+        link  = item.find("link").text.strip()
+        lines.append(f"🧠 {title}\n🔗 {link}")
+
+    return "🧠 AI 相關新聞\n\n" + "\n\n".join(lines)
 
 
 def _get_security() -> str:
