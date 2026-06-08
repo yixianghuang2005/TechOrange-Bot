@@ -37,8 +37,24 @@ def dispatch_intent(intent_name: str, user_text: str) -> str:
             return _get_security()             # ← 直接 RSS，不用 AI
 
         elif intent_name == "keyword":
-            keyword = user_text.replace("什麼是", "").replace("解釋", "").replace("？", "").strip()
-            return _explain_keyword(keyword)   # ← 用 Gemini
+            # 清理關鍵字
+            keyword = user_text
+            for w in ["什麼是", "解釋一下", "解釋", "關鍵字科普", "關鍵字", "？", "?"]:
+                keyword = keyword.replace(w, "")
+            keyword = keyword.strip()
+
+            if not keyword:
+                # 使用者只按了按鈕，還沒輸入詞彙
+                return (
+                    "🔍 關鍵字科普\n\n"
+                    "請輸入想了解的科技詞彙！\n\n"
+                    "例如：\n"
+                    "• 什麼是 RAG？\n"
+                    "• 解釋 Agentic AI\n"
+                    "• MCP 是什麼\n"
+                    "• 邊緣運算"
+                )
+            return _explain_keyword(keyword)   # ← 有詞彙才呼叫 Gemini
 
         elif intent_name == "industry":
             return _get_industry()             # ← 直接 RSS，不用 AI
