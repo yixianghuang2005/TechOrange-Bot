@@ -1,6 +1,6 @@
 """
-Rich Menu 按鈕點擊處理：
-  按鈕傳來 postback data → 直接呼叫功能（不過 Dialogflow，更快）
+Rich Menu 按鈕點擊處理
+按鈕傳來 postback data → 直接呼叫功能（不過 Dialogflow）
 
 Rich Menu 按鈕設定的 data 值：
   A → action=daily_brief
@@ -19,7 +19,7 @@ configuration = Configuration(access_token=os.getenv("LINE_CHANNEL_ACCESS_TOKEN"
 
 
 def handle_postback(event):
-    data = event.postback.data          # 例如 "action=daily_brief"
+    data = event.postback.data
     user_id = event.source.user_id
     reply_token = event.reply_token
 
@@ -42,14 +42,21 @@ def dispatch_action(action: str, user_id: str) -> str:
         return get_daily_brief()
 
     elif action == "ai_consultant":
-        return "請輸入您的行業別，例如：「零售業」、「製造業」、「餐飲業」"
+        return "🧠 AI 落地顧問\n\n請輸入您的行業別，我會幫您生成 AI 轉型建議！\n\n例如：「我是零售業」、「我是製造業」"
 
     elif action == "security":
         from features.security.alert import get_security_alert
         return get_security_alert()
 
     elif action == "keyword":
-        return "請輸入想了解的科技關鍵字，例如：RAG、Agentic AI、邊緣運算"
+        return (
+            "🔍 關鍵字科普\n\n"
+            "請輸入想了解的科技詞彙，例如：\n"
+            "• 什麼是 RAG？\n"
+            "• 解釋 Agentic AI\n"
+            "• MCP 是什麼\n"
+            "• 邊緣運算"
+        )
 
     elif action == "industry":
         from features.industry.transform import get_transform_cases

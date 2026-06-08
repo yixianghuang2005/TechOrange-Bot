@@ -1,27 +1,23 @@
-"""F 格：訂閱設定"""
-from db.firebase import get_user_settings, save_user_settings
+"""F 格：使用說明"""
 
 
 def show_settings(user_id: str) -> str:
-    settings = get_user_settings(user_id)
-    push = "✅ 已開啟" if settings.get("push_enabled") else "❌ 未開啟"
-    time = settings.get("push_time", "09:00")
     return (
-        f"⚙️ 我的訂閱設定\n\n"
-        f"每日推播：{push}\n"
-        f"推播時間：{time}\n\n"
-        f"輸入以下指令修改：\n"
-        f"• 「開啟推播」/ 「關閉推播」\n"
-        f"• 「設定時間 HH:MM」（例如：設定時間 08:30）"
+        "⚙️ TechOrange 科技智囊　使用說明\n"
+        "━━━━━━━━━━━━━━━━━━\n"
+        "🚀 今日科技早報\n"
+        "　→ 每日最新科技新聞摘要\n\n"
+        "🧠 AI 落地顧問\n"
+        "　→ 輸入行業別，獲得 AI 轉型建議\n"
+        "　→ 例如：「我是零售業」\n\n"
+        "🛡️ 資安預警\n"
+        "　→ 最新資安威脅 + 企業檢查清單\n\n"
+        "🔍 關鍵字科普\n"
+        "　→ 輸入科技詞彙獲得白話解釋\n"
+        "　→ 例如：「什麼是 RAG？」\n\n"
+        "🏭 產業轉型案例\n"
+        "　→ 台灣中小企業轉型參考案例\n\n"
+        "━━━━━━━━━━━━━━━━━━\n"
+        "📌 資料來源：techorange.com\n"
+        "🤖 AI 回覆由 Gemini 生成"
     )
-
-
-def update_push(user_id: str, enabled: bool) -> str:
-    save_user_settings(user_id, {"push_enabled": enabled})
-    status = "已開啟" if enabled else "已關閉"
-    return f"✅ 每日推播{status}！"
-
-
-def update_push_time(user_id: str, time_str: str) -> str:
-    save_user_settings(user_id, {"push_time": time_str})
-    return f"✅ 推播時間已設為 {time_str}"
