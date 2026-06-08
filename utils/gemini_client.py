@@ -11,7 +11,9 @@ MODEL = "gemini-2.0-flash"
 
 def _get_client():
     """每次呼叫才建立 client，確保能讀到環境變數"""
-    return genai.Client()
+    import os
+    api_key = os.getenv("GEMINI_API_KEY")
+    return genai.Client(api_key=api_key)
 
 
 def ask_gemini(prompt: str, system_instruction: str = None) -> str:
